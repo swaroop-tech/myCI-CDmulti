@@ -1,0 +1,24 @@
+node('built-in')
+{
+    stage('ContinousDownload')
+    {
+        git 'https://github.com/prasadcloud/maven2.git'
+    }
+    stage('ContinousBuild')
+    {
+        sh 'mvn package'
+    }
+    stage('ContinousDeploy')
+    {
+        deploy adapters: [tomcat9(credentialsId: '1c3e190c-43b1-4ff6-8cb6-b6aa2d81e96d', path: '', url: 'http://172.31.16.205:8080')], contextPath: 'test10', war: '**/*.war'
+    }
+    stage('ContinousTesting')
+    {
+        git 'https://github.com/prasadcloud/FunctionalTesting.git'
+        sh 'java -jar /var/lib/jenkins/workspace/scripted/testing.jar'
+    }
+    stage('ContinousDelivery')
+    {
+        deploy adapters: [tomcat9(credentialsId: '1c3e190c-43b1-4ff6-8cb6-b6aa2d81e96d', path: '', url: 'http://172.31.29.172:8080')], contextPath: 'prod11', war: '**/*.war'
+    }
+}
