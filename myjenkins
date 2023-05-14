@@ -1,24 +1,43 @@
-node('built-in')
+pipeline
 {
-    stage('ContinousDownload')
+    agent any
+    stages
     {
-        git 'https://github.com/prasadcloud/maven2.git'
-    }
-    stage('ContinousBuild')
-    {
-        sh 'mvn package'
-    }
-    stage('ContinousDeploy')
-    {
-        deploy adapters: [tomcat9(credentialsId: '1c3e190c-43b1-4ff6-8cb6-b6aa2d81e96d', path: '', url: 'http://172.31.16.205:8080')], contextPath: 'test10', war: '**/*.war'
-    }
-    stage('ContinousTesting')
-    {
-        git 'https://github.com/prasadcloud/FunctionalTesting.git'
-        sh 'java -jar /var/lib/jenkins/workspace/scripted/testing.jar'
-    }
-    stage('ContinousDelivery')
-    {
-        deploy adapters: [tomcat9(credentialsId: '1c3e190c-43b1-4ff6-8cb6-b6aa2d81e96d', path: '', url: 'http://172.31.29.172:8080')], contextPath: 'prod11', war: '**/*.war'
+        stage('ContinousDownload')
+        {
+            steps
+            {
+                git 'https://github.com/prasadcloud/maven2.git'
+            }
+        }
+        stage('ContinousBuild')
+        {
+            steps
+            {
+                sh 'mvn package'
+            }
+        }
+        stage('ContinousDeploy')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: '1c3e190c-43b1-4ff6-8cb6-b6aa2d81e96d', path: '', url: 'http://172.31.16.205:8080')], contextPath: 'testing', war: '**/*.war' 
+            }
+        }    
+        stage('ContinousTesting')
+        {
+            steps
+            {
+                git 'https://github.com/prasadcloud/FunctionalTesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/scripted/testing.jar'
+            }
+        }
+        stage('ContinousDelivery')
+        {
+            steps
+            {
+               deploy adapters: [tomcat9(credentialsId: '1c3e190c-43b1-4ff6-8cb6-b6aa2d81e96d', path: '', url: 'http://172.31.29.172:8080')], contextPath: 'production', war: '**/*.war'
+            }
+        }
     }
 }
